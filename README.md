@@ -1,4 +1,4 @@
 # tardis
-polleggio, un attimo ci stiamo pensando
+Dependencies
 
-Just a moment we're thinking about it
+pip3 install flask flask-sqlalchemy flask-wtf
