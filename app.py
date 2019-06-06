@@ -12,7 +12,7 @@ class User(db.Model):
     token = db.Column(db.String(200), nullable=True)
     date_ins = db.Column(db.DateTime, nullable=True)
     date_ult_mod = db.Column(db.DateTime, nullable=True)
-    token_expire = db.Column(db.DateTime, nullable=True)
+    token_expire = db.Column(db.String(200), nullable=True)
 
 @app.route('/')
 def index():
@@ -20,7 +20,8 @@ def index():
 
 @app.route('/duke')
 def duke():
-    return render_template('duke.html')
+    user = User.query.all()
+    return render_template('duke.html', user=user)
 
 if __name__== "__main__":
     app.run(debug=True)
