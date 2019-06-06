@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:pippo@tardis.cuhorxnidu3b.us-west-2.rds.amazonaws.com/tardis_base'
+app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:gesammelte$$schriften@tardis.cuhorxnidu3b.us-west-2.rds.amazonaws.com/tardis_base'
 db = SQLAlchemy(app)
 
 class User(db.Model):
@@ -20,7 +20,8 @@ def index():
 
 @app.route('/duke')
 def duke():
-    return render_template('duke.html')
+    user = User.query.all()
+    return render_template('duke.html', user=user)
 
 if __name__== "__main__":
     app.run(debug=True)
