@@ -20,15 +20,15 @@ def index():
 
 @app.route('/duke')
 def duke():
-    user = User.query.all()
-    return render_template('duke.html', user=user)
+    users = User.query.all()
+    return render_template('duke.html', users=users)
 
 @app.route('/duke', methods=['POST'])
 def duke_post():
     email = request.form.get('user_mail')
     #return render_template('duke.html', user=user)
 
-    duke_post = User(iduser=200, email=email)
+    duke_post = User(iduser=2023, email=email)
     db.session.add(duke_post)
     db.session.commit()
 
