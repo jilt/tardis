@@ -28,8 +28,8 @@ def duke_post():
     email = request.form.get('user_mail')
     #return render_template('duke.html', user=user)
 
-    new_user = User(iduser=11, email=email)
-    db.session.add(new_user)
+    duke_post = User(iduser=200, email=email)
+    db.session.add(duke_post)
     db.session.commit()
 
     return duke()
