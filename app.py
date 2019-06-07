@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -22,6 +22,17 @@ def index():
 def duke():
     user = User.query.all()
     return render_template('duke.html', user=user)
+
+@app.route('/duke', methods=['POST'])
+def duke_post():
+    email = request.form.get('user_mail')
+    #return render_template('duke.html', user=user)
+
+    new_user = User(iduser=11, email=email)
+    db.session.add(new_user)
+    db.session.commit()
+
+    return duke()
 
 if __name__== "__main__":
     app.run(debug=True)
