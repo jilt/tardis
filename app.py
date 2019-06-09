@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:pippo@tardis.cuhorxnidu3b.us-west-2.rds.amazonaws.com/tardis_base'
+app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:pippon@tardis.cuhorxnidu3b.us-west-2.rds.amazonaws.com/tardis_base'
 db = SQLAlchemy(app)
 
 class User(db.Model):
@@ -14,25 +14,41 @@ class User(db.Model):
     date_ult_mod = db.Column(db.DateTime, nullable=True)
     token_expire = db.Column(db.String(200), nullable=True)
 
+class user_logs(db.Model):
+    idlog = db.Column(db.Integer, primary_key=True)
+    usrid_type_op = db.Column(db.Integer, primary_key=False)
+    date_log_stamp = db.Column(db.DateTime, nullable=True)
+    notes = db.Column(db.String(200), nullable=True)
+    iduser = db.Column(db.Integer, nullable=True, primary_key=False)
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/duke')
 def duke():
-    user = User.query.all()
-    return render_template('duke.html', user=user)
+    users = User.query.all()
+    users_log = user_logs.query.all()
+    return render_template('duke.html', users=users)
 
 @app.route('/duke', methods=['POST'])
 def duke_post():
     email = request.form.get('user_mail')
     #return render_template('duke.html', user=user)
 
-    duke_post = User(iduser=200, email=email)
+    duke_post = User(email=email)
     db.session.add(duke_post)
     db.session.commit()
 
-    return duke()
+    usrid_type_op = 2
+    #return render_template('duke.html', user=user)
+    datelognowtime = datetime.now()
+    duke_post = user_logs(usrid_type_op=usrid_type_op, date_log_stamp=datelognowtime)
+    db.session.add(duke_post)
+    db.session.commit()
+
+    return duke() 
 
 if __name__== "__main__":
     app.run(debug=True)
