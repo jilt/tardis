@@ -3,7 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:gesammelte$$schriften@tardis.cuhorxnidu3b.us-west-2.rds.amazonaws.com/tardis_base'
+
+app.secret_key = '\x89s\xed\x9e\xf7\x9b\xf5\xd4n\xab\xa1\x8e\x08\x95\xfd\x8fD\xe3\x8a\xe5\xa69V\xbe'
+app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:pippo@tardis.cuhorxnidu3b.us-west-2.rds.amazonaws.com/tardis_base'
 db = SQLAlchemy(app)
 
 class User(db.Model):
@@ -13,13 +15,14 @@ class User(db.Model):
     date_ins = db.Column(db.DateTime, nullable=True)
     date_ult_mod = db.Column(db.DateTime, nullable=True)
     token_expire = db.Column(db.String(200), nullable=True)
+    user_log = db.relationship('user_logs', backref='user', lazy=True)
 
 class user_logs(db.Model):
     idlog = db.Column(db.Integer, primary_key=True)
     usrid_type_op = db.Column(db.Integer, primary_key=False)
     date_log_stamp = db.Column(db.DateTime, nullable=True)
     notes = db.Column(db.String(200), nullable=True)
-    iduser = db.Column(db.Integer, nullable=True, primary_key=False)
+    iduser = db.Column(db.Integer, db.ForeignKey('user.iduser'), nullable=True)
 
 class user_logs_op_type(db.Model):
     id_op_type = db.Column(db.Integer, primary_key=True)
