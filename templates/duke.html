@@ -21,4 +21,15 @@
 	<p>{{user.iduser}} - {{user.email}}</p>
 </div>
 {% endfor %}
+
+<div>
+	<p><select>
+		<option value="*">Select item</option>
+		{% for user_log_type in user_logs_type %}
+		<option value="{{user_log_type.id_op_type}}">{{user_log_type.op_description}}</option>
+		{% endfor %}
+	  </select></p>
+</div>
+
+
 {% endblock %}
