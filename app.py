@@ -1,13 +1,16 @@
 from flask import Flask, render_template, url_for, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from wtforms import Form, StringField, validators
 
 app = Flask(__name__)
-
+dukee = 'Email'
 app.secret_key = '\x89s\xed\x9e\xf7\x9b\xf5\xd4n\xab\xa1\x8e\x08\x95\xfd\x8fD\xe3\x8a\xe5\xa69V\xbe'
-app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:pippo@tardis.cuhorxnidu3b.us-west-2.rds.amazonaws.com/tardis_base'
+app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:pippoancheio@tardis.cuhorxnidu3b.us-west-2.rds.amazonaws.com/tardis_base'
 db = SQLAlchemy(app)
 
+
+#Model
 class User(db.Model):
     iduser = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(200), nullable=False)
@@ -27,43 +30,45 @@ class user_logs(db.Model):
 class user_logs_op_type(db.Model):
     id_op_type = db.Column(db.Integer, primary_key=True)
     op_description = db.Column(db.String(200), nullable=True)
-     
+
+#Forms
+class RegistrationForm(Form):
+    user_mail = StringField(dukee,[validators.Length(min=4, max=25)])
+
+
+#URL
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/duke')
+@app.route('/duke', methods=['GET', 'POST'])
 def duke():
-    users = User.query.all()
-    user_log = user_logs.query.all()
-    user_logs_type = user_logs_op_type.query.all()
-    return render_template('duke.html', users=users, user_logs_type=user_logs_type)
-
-
-@app.route('/duke', methods=['POST'])
-def duke_post():
-
-    
-
-    email = request.form.get('user_mail')
-    #return render_template('duke.html', user=user)
-    if user_exists(email):
-        e = "errore: questa email è già stata utilizzata, se lo hai fatto tu clicca il seguente link per loggarti o fare il recupero della password. ALtrimenti cambia email!"
-        return render_template('error.html', e=e)
+    form = RegistrationForm(request.form)
+    if(request.method == 'POST'):
+        form = RegistrationForm(request.form)
+        if(form.validate()):
+            email = request.form.get('user_mail')
+            if user_exists(email):
+                e = "errore: questa email è già stata utilizzata, se lo hai fatto tu clicca il seguente link per loggarti o fare il recupero della password. ALtrimenti cambia email!"
+                return render_template('error.html', e=e)
+            else:
+                duke_post = User(email=email)    
+                db.session.add(duke_post)
+                db.session.commit()
+                usrid_type_op = 3
+                #return render_template('duke.html', user=user)
+                datelognowtime = datetime.now()
+                duke_post = user_logs(usrid_type_op=usrid_type_op, date_log_stamp=datelognowtime)
+                db.session.add(duke_post)
+                db.session.commit()
+        else:
+            e = 'errore: i dati inseriti non sono validi'
+            return render_template('error.html', e=e)
     else:
-        duke_post = User(email=email)
-        
-        db.session.add(duke_post)
-        db.session.commit()
-
-        usrid_type_op = 3
-        #return render_template('duke.html', user=user)
-        datelognowtime = datetime.now()
-        duke_post = user_logs(usrid_type_op=usrid_type_op, date_log_stamp=datelognowtime)
-        db.session.add(duke_post)
-        db.session.commit()
-
-    return duke() 
+        users = User.query.all()
+        user_log = user_logs.query.all()
+        user_logs_type = user_logs_op_type.query.all()
+        return render_template('duke.html', users=users, user_logs_type=user_logs_type, form=form)
 
 def user_exists(e_mail):
     if(User.query.filter(User.email == e_mail).first() is not None):

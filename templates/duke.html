@@ -5,31 +5,26 @@
 {% endblock %}
 
 {% block body %} 
-<form action="{{url_for('duke_post')}}" method="post">
-	<div>
-		<div style="float:left;">
-		<label for="mail">E-mail:</label>
-		<input type="email" id="mail" name="user_mail">
-		</div>
-		<div class="button">
-			<button type="submit">Send</button>
-		</div>
-	</div>
-  </form>
+{% from "_formhelpers.html" import render_field %}
+<form method=post action={{ url_for('duke') }}>
+  <dl>
+    {{ render_field(form.user_mail) }}
+  <p><input type=submit value=Register>
+</form>
 {% for user in users %}
 <div>
 	<p>{{user.iduser}} - {{user.email}}</p>
 </div>
 {% endfor %}
 
-<div>
+<!--<div>
 	<p><select>
 		<option value="*">Select item</option>
 		{% for user_log_type in user_logs_type %}
 		<option value="{{user_log_type.id_op_type}}">{{user_log_type.op_description}}</option>
 		{% endfor %}
 	  </select></p>
-</div>
+</div>-->
 
 
 {% endblock %}
