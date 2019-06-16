@@ -2,6 +2,7 @@ from flask import Flask, render_template, url_for, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from wtforms import Form, StringField, validators
+from flask_wtf.csrf import CSRFProtect
 #from flask.ext.dropbox import Dropbox, DropboxBlueprint
 import dropbox
 import configparser
@@ -17,7 +18,7 @@ config.read('example.cfg')
 app.secret_key = '\x89s\xed\x9e\xf7\x9b\xf5\xd4n\xab\xa1\x8e\x08\x95\xfd\x8fD\xe3\x8a\xe5\xa69V\xbe'
 app.config['SQLALCHEMY_DATABASE_URI']='mysql://'+ config['MySqlConnection']['username']+':'+config['MySqlConnection']['pwd']+'@'+ config['MySqlConnection']['url']
 db = SQLAlchemy(app)
-
+csrf = CSRFProtect(app)
 
 
 
