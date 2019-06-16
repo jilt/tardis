@@ -2,12 +2,18 @@ from flask import Flask, render_template, url_for, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from wtforms import Form, StringField, validators
+#from flask.ext.dropbox import Dropbox, DropboxBlueprint
+import dropbox
 
+
+    
 app = Flask(__name__)
 dukee = 'Email'
 app.secret_key = '\x89s\xed\x9e\xf7\x9b\xf5\xd4n\xab\xa1\x8e\x08\x95\xfd\x8fD\xe3\x8a\xe5\xa69V\xbe'
-app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:pippoancheio@tardis.cuhorxnidu3b.us-west-2.rds.amazonaws.com/tardis_base'
+app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:gesammelte$$schriften@tardis.cuhorxnidu3b.us-west-2.rds.amazonaws.com/tardis_base'
 db = SQLAlchemy(app)
+
+
 
 
 #Model
@@ -39,7 +45,31 @@ class RegistrationForm(Form):
 #URL
 @app.route('/')
 def index():
-    return render_template('index.html')
+    
+    print("Scanning for files......")
+    dbx = dropbox.Dropbox("MXKKw4wYA7cAAAAAAAADHBryaFe3ycl-hzQODtzPd2QqXScQtflFhIld0zLN4sUq")
+    def process_folder_entries(current_state, entries):
+        for entry in entries:
+            if isinstance(entry, dropbox.files.FileMetadata):
+                current_state[entry.path_lower] = entry
+                #print(entry)
+            elif isinstance(entry, dropbox.files.DeletedMetadata):
+                current_state.pop(entry.path_lower, None) # ignore KeyError if missing
+                
+        return current_state
+    result = dbx.files_list_folder(path="/Agnese")
+    files = process_folder_entries({}, result.entries)
+
+    # check for and collect any additional entries
+    print(files)
+    
+
+    while result.has_more:
+        print("Collecting additional files...""""  """)
+        result = dbx.files_list_folder_continue(result.cursor)
+        files = process_folder_entries(files, result.entries)
+    print(files)
+    return render_template('index.html', files=files)
 
 @app.route('/duke', methods=['GET', 'POST'])
 def duke():
