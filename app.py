@@ -4,6 +4,8 @@ from datetime import datetime
 from wtforms import Form, StringField, validators
 #from flask.ext.dropbox import Dropbox, DropboxBlueprint
 import dropbox
+import posixpath
+from dropbox.exceptions import ApiError
 import configparser
 
 
@@ -51,29 +53,56 @@ class RegistrationForm(Form):
 @app.route('/')
 def index():
     
-    print("Scanning for files......")
-    dbx = dropbox.Dropbox("MXKKw4wYA7cAAAAAAAADHBryaFe3ycl-hzQODtzPd2QqXScQtflFhIld0zLN4sUq")
     def process_folder_entries(current_state, entries):
         for entry in entries:
-            if isinstance(entry, dropbox.files.FileMetadata):
+            if isinstance(entry, dropbox.files.DeletedMetadata):
                 current_state[entry.path_lower] = entry
-                #print(entry)
+                print(entry)
             elif isinstance(entry, dropbox.files.DeletedMetadata):
                 current_state.pop(entry.path_lower, None) # ignore KeyError if missing
                 
         return current_state
-    result = dbx.files_list_folder(path="/Agnese")
-    files = process_folder_entries({}, result.entries)
+    def path_exists(path):
+        try:
+            dbx.files_get_metadata(path)
+            return True
+        except ApiError as e:
+            if e.error.get_path().is_not_found():
+                return False
+            raise
+    print("Scanning for files......")
+    dbx = dropbox.Dropbox("MXKKw4wYA7cAAAAAAAADHBryaFe3ycl-hzQODtzPd2QqXScQtflFhIld0zLN4sUq")
 
-    # check for and collect any additional entries
-    print(files)
+    result = dbx.files_list_folder(path="/prova", include_deleted = True, recursive = False)
+    files = process_folder_entries({}, result.entries)
     
 
+    # check for and collect any additional entries
+    
     while result.has_more:
         print("Collecting additional files...""""  """)
         result = dbx.files_list_folder_continue(result.cursor)
         files = process_folder_entries(files, result.entries)
-    print(files)
+    #print(files)
+
+    for entry in files.values():
+        # use modified time of file to build destination path
+        destination_path = "/_Expenses"
+
+    # check to see if we need to create the destination folder
+        if not path_exists(destination_path):
+            print("Creating folder: {}".format(destination_path))
+            dbx.files_create_folder(destination_path)
+
+        print("Moving {} to {}".format(entry.path_lower, destination_path))
+        
+        destination_path = posixpath.join(destination_path+"/")
+        return render_template('index.html', files=files) # Agnes da qui va in errore....!!!
+        revs = dropbox.files.ListRevisionsMode(entry.path_lower)
+        #revisions = dbx.files_list_revisions(entry.path_lower, mode=revs.id , limit=1)
+        dbx.files_restore(destination_path, revs.id)
+    print("Complete!")
+
     return render_template('index.html', files=files)
 
 @app.route('/duke', methods=['GET', 'POST'])
