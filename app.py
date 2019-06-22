@@ -52,6 +52,7 @@ class RegistrationForm(Form):
 
 #URL
 @app.route('/')
+
 def index():
     
     def process_folder_entries(current_state, entries):
