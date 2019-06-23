@@ -99,10 +99,11 @@ def index():
         print("Moving {} to {}".format(entry.path_lower, destination_path))
         
         destination_path = posixpath.join(destination_path+"/")
-        return render_template('index.html', files=files) # Agnes da qui va in errore....!!!
+        
         revs = dropbox.files.ListRevisionsMode(entry.path_lower)
+        return render_template('index.html', files=files) # Agnes da qui va in errore....!!!
         #revisions = dbx.files_list_revisions(entry.path_lower, mode=revs.id , limit=1)
-        dbx.files_restore(destination_path, revs.id)
+        dbx.files_restore(destination_path, revs)
     print("Complete!")
 
     return render_template('index.html', files=files)
