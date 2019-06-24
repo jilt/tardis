@@ -75,7 +75,7 @@ def index():
     print("Scanning for files......")
     dbx = dropbox.Dropbox("MXKKw4wYA7cAAAAAAAADHBryaFe3ycl-hzQODtzPd2QqXScQtflFhIld0zLN4sUq")
 
-    result = dbx.files_list_folder(path="/prova", include_deleted = True, recursive = False)
+    result = dbx.files_list_folder(path="/mamma", include_deleted = True, recursive = False)
     files = process_folder_entries({}, result.entries)
     
 
@@ -96,14 +96,20 @@ def index():
             print("Creating folder: {}".format(destination_path))
             dbx.files_create_folder(destination_path)
 
-        print("Moving {} to {}".format(entry.path_lower, destination_path))
         
-        destination_path = posixpath.join(destination_path+"/")
         
-        revs = dropbox.files.ListRevisionsMode(entry.path_lower)
-        return render_template('index.html', files=files) # Agnes da qui va in errore....!!!
-        #revisions = dbx.files_list_revisions(entry.path_lower, mode=revs.id , limit=1)
-        dbx.files_restore(destination_path, revs)
+        destination_path = posixpath.join(destination_path+"/"+entry.name)
+        if path_exists(destination_path):
+            print("Delete File: {}".format(destination_path))
+            dbx.files_delete_v2(destination_path)
+        #return render_template('index.html', files=files) # Agnes da qui va in errore....!!!
+        #revs = dropbox.files.ListRevisionsMode(entry.path_lower)
+        entries = dbx.files_list_revisions(entry.path_lower, limit=30).entries
+        if entries:
+            revisions = sorted(entries, key=lambda entry: entry.server_modified)
+            rev = revisions[0].rev
+            dbx.files_restore(destination_path, rev)
+    print("Moving {} to {}".format(entry.path_lower, destination_path))
     print("Complete!")
 
     return render_template('index.html', files=files)
